@@ -8,12 +8,14 @@ namespace API.Core.Specifications
     //daha specific sorgular için alt class 
     public class BaseSpecification<T> : ISpecification<T>
     {
+        public BaseSpecification()
+        {
+
+        }
         public BaseSpecification(Expression<Func<T,bool>> criteria)
         {
             Criteria = criteria;
         }
-
-
 
         public Expression<Func<T, bool>> Criteria { get; }
 
