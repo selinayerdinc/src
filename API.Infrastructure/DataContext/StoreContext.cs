@@ -1,9 +1,6 @@
 ﻿
 using API.Core.DbModels;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-
 namespace API.Infrastructure.DataContext
 {
     public class StoreContext : DbContext
@@ -12,7 +9,7 @@ namespace API.Infrastructure.DataContext
         {
         } 
         public DbSet<Product> Products { get; set; }
-
-       
+        public DbSet<ProductBrand> ProductBrands { get; set; }
+        public DbSet<ProductType> ProductTypes { get; set; }
     }
 }
