@@ -1,13 +1,14 @@
-﻿using API.Core.Interfaces;
+﻿using API.Extensions;
 using API.Helpers;
 using API.Infrastructure.DataContext;
-using API.Infrastructure.Implements;
+using API.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 
 namespace API
 {
@@ -23,12 +24,13 @@ namespace API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddScoped<IProductRepository, ProductRepository>();// IProductRepository gördüğünde ProductRepository e git.
-            services.AddScoped(typeof(IGenericRepository<>), (typeof(GenericRepository<>)));
+           
             services.AddAutoMapper(typeof(MappingProfiles));
             services.AddControllers();
             services.AddDbContext<StoreContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
+            services.AddSwaggerGen(c=> c.SwaggerDoc("v1", new OpenApiInfo { Title = "E-Commerce-API", Version = "v1" }));
+            services.AddApplicationServices();
+            services.AddSwaggerDocumentation();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -38,12 +40,13 @@ namespace API
             {
                 app.UseDeveloperExceptionPage();
             }
-
+           
+            app.UseMiddleware<ExceptionMiddleware>();
             app.UseHttpsRedirection();
-
+            app.UseStatusCodePagesWithReExecute("/error/{0}");
             app.UseRouting();
-
             app.UseAuthorization();
+            app.UseSwaggerDocumention();
 
             app.UseEndpoints(endpoints =>
             {
