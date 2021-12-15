@@ -2,6 +2,7 @@
 using API.Core.Interfaces;
 using API.Core.Specifications;
 using API.Dtos;
+using API.Helpers;
 using API.Infrastructure.DataContext;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -16,12 +17,12 @@ namespace API.Controllers
     //https:localhos:5001/api/products
 
 
-       public class ProductsController : ControllerBase
+    public class ProductsController : BaseApiController
     {
         //private readonly StoreContext _context;
         //private readonly IProductRepository _productRepository;
 
-        private readonly IGenericRepository<Product>_productRepository;
+        private readonly IGenericRepository<Product> _productRepository;
         private readonly IGenericRepository<ProductBrand> _productBrandRepository;
         private readonly IGenericRepository<ProductType> _productTypeRepository;
 
@@ -29,7 +30,7 @@ namespace API.Controllers
 
         public ProductsController(IGenericRepository<Product> productRepository,
                                     IGenericRepository<ProductBrand> productBrandRepository,
-                                    IGenericRepository<ProductType> productTypeRepository,IMapper mapper)
+                                    IGenericRepository<ProductType> productTypeRepository, IMapper mapper)
         {
             _productRepository = productRepository;
             _productBrandRepository = productBrandRepository;
@@ -41,22 +42,15 @@ namespace API.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetProducts()        //async de yapabiliriz. await eklemeyi unutma tolist ve find da async olacak!
+        public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetProducts([FromQuery] ProductSpecParams productSpecParams)        //async de yapabiliriz. await eklemeyi unutma tolist ve find da async olacak!
         {
-            var spec = new ProductWithProductTypeAndProductBrandSpecification();
-            var data = await _productRepository.ListAsync(spec);
-            //eturn Ok(data);
-            //return data.Select(pro => new ProductToReturnDto
-            //{
-            //    Id = pro.Id,
-            //    Name = pro.Name,
-            //    Description = pro.Description,
-            //    PictureUrl = pro.PictureUrl,
-            //    Price = pro.Price,
-            //    ProductBrand = pro.ProductBrand != null ? pro.ProductBrand.Name : string.Empty,
-            //    ProductType = pro.ProductType != null ? pro.ProductType.Name : string.Empty
-            //}).ToList();
-            return Ok(_mapper.Map <IReadOnlyList<Product>, IReadOnlyList<ProductToReturnDto>>(data));
+            var spec = new ProductWithProductTypeAndProductBrandSpecification(productSpecParams);
+            var countSpec = new ProductWithFiltersForCountSpecification(productSpecParams);
+            var totalItems = await _productRepository.CountAsync(spec);
+            var products = await _productRepository.ListAsync(spec);
+            var data = _mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductToReturnDto>>(products);
+
+            return Ok(new Pagination<ProductToReturnDto>(productSpecParams.PageIndex, productSpecParams.PageSize, totalItems, data));
         }
 
         [HttpGet("{id}")]

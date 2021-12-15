@@ -23,7 +23,7 @@ namespace API.Extensions
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "E-Commerce API");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "E-Commerce AP");
             });
             return app;
         }

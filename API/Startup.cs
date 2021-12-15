@@ -28,7 +28,6 @@ namespace API
             services.AddAutoMapper(typeof(MappingProfiles));
             services.AddControllers();
             services.AddDbContext<StoreContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddSwaggerGen(c=> c.SwaggerDoc("v1", new OpenApiInfo { Title = "E-Commerce-API", Version = "v1" }));
             services.AddApplicationServices();
             services.AddSwaggerDocumentation();
         }
